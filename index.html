@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yod Intelligence — Em construção</title>
+<meta name="description" content="Yod Intelligence: IA, ciência de dados, BI, produtos de dados, sustentabilidade, data intelligence, AI solutions e research. Site em construção.">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+</head>
+<body style="margin:0">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="180x180" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+<style>
+  :root {
+    --bg0: #02060f;
+    --bg1: #04122b;
+    --cyan: #38bdf8;
+    --blue: #2f8fd0;
+    --deep: #1d5fa8;
+    --text: #eaf3ff;
+    --muted: rgba(214, 232, 255, 0.68);
+    --line: rgba(140, 200, 255, 0.16);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  html { color-scheme: dark; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex; flex-direction: column;
+    background: radial-gradient(1200px 800px at 50% -10%, #0a2547 0%, var(--bg1) 34%, var(--bg0) 72%) fixed,
+                var(--bg0);
+    color: var(--text);
+    font-family: "Sora", "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    text-align: center;
+    overflow-x: hidden;
+  }
+
+  /* ---------- background layers ---------- */
+  #netCanvas {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .aurora { position: fixed; inset: -20%; pointer-events: none; filter: blur(70px); opacity: .55; }
+  .aurora span {
+    position: absolute; border-radius: 50%;
+    mix-blend-mode: screen; opacity: .5;
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .aurora span:nth-child(1) {
+    width: 52vmax; height: 52vmax; left: -12vmax; top: -14vmax;
+    background: radial-gradient(circle at 35% 35%, rgba(56,189,248,.5), transparent 65%);
+  }
+  .aurora span:nth-child(2) {
+    width: 58vmax; height: 58vmax; right: -16vmax; top: -10vmax;
+    background: radial-gradient(circle at 60% 40%, rgba(29,95,168,.65), transparent 65%);
+    animation-delay: -6s; animation-duration: 22s;
+  }
+  .aurora span:nth-child(3) {
+    width: 60vmax; height: 60vmax; left: 8vmax; bottom: -26vmax;
+    background: radial-gradient(circle at 50% 50%, rgba(16,185,129,.22), transparent 65%);
+    animation-delay: -11s; animation-duration: 26s;
+  }
+  @keyframes drift {
+    from { transform: translate3d(-3%, -2%, 0) scale(1); }
+    to   { transform: translate3d(4%, 5%, 0) scale(1.12); }
+  }
+  .grid {
+    position: fixed; inset: 0; pointer-events: none; opacity: .5;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 90% 75% at 50% 45%, black 30%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 45%, black 30%, transparent 78%);
+  }
+  .vignette {
+    position: fixed; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 105% 90% at 50% 45%, transparent 52%, rgba(0,0,0,.55) 100%);
+  }
+  .noise {
+    position: fixed; inset: 0; pointer-events: none; opacity: .05; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  }
+
+  /* floating keywords */
+  #words { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+  #words span {
+    position: absolute; bottom: -8%;
+    white-space: nowrap;
+    color: #bfe3ff;
+    font-size: 13px; letter-spacing: .22em; text-transform: uppercase;
+    opacity: 0;
+    animation: rise linear infinite;
+    text-shadow: 0 0 18px rgba(56,189,248,.35);
+  }
+  @keyframes rise {
+    0%   { transform: translateY(0); opacity: 0; }
+    8%   { opacity: var(--o, .18); }
+    85%  { opacity: var(--o, .18); }
+    100% { transform: translateY(-118vh); opacity: 0; }
+  }
+
+  /* ---------- center content ---------- */
+  .stage {
+    position: relative; z-index: 2;
+    flex: 1 0 auto;
+    width: 100%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 48px 20px 28px;
+  }
+  .logo-wrap {
+    animation: fadeUp 1s ease both;
+    filter: drop-shadow(0 0 42px rgba(56,189,248,.28)) drop-shadow(0 8px 60px rgba(0,0,0,.5));
+  }
+  .logo-wrap img {
+    width: min(560px, 82vw);
+    height: auto; display: block;
+  }
+  .badge {
+    margin-top: 34px;
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 9px 20px 9px 16px;
+    border: 1px solid rgba(125, 211, 252, .35);
+    border-radius: 999px;
+    background: rgba(8, 25, 50, .55);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    font-size: 12.5px; letter-spacing: .32em; text-transform: uppercase;
+    color: #cdeaff;
+    animation: fadeUp 1s .12s ease both;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px #4ade80; animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(.6); opacity: .5; } }
+
+  h1.tagline {
+    margin: 26px 0 0;
+    font-size: clamp(20px, 3.4vw, 32px);
+    font-weight: 600; letter-spacing: .01em; line-height: 1.3;
+    animation: fadeUp 1s .22s ease both;
+  }
+  h1.tagline .grad {
+    background: linear-gradient(92deg, #7dd3fc, #38bdf8 35%, #34d399 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  p.sub {
+    margin: 14px 0 0; max-width: 640px;
+    color: var(--muted); font-size: clamp(14px, 1.8vw, 16.5px); line-height: 1.7;
+    animation: fadeUp 1s .3s ease both;
+  }
+  .bar { width: 230px; height: 3px; margin: 30px auto 0; border-radius: 99px; background: rgba(148,197,255,.15); overflow: hidden; animation: fadeUp 1s .38s ease both; }
+  .bar i { display: block; height: 100%; width: 40%; border-radius: 99px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); animation: sweep 1.6s ease-in-out infinite; }
+  @keyframes sweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(280%); } }
+
+  .pills {
+    margin: 30px 0 0; padding: 0; list-style: none;
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 760px;
+    animation: fadeUp 1s .46s ease both;
+  }
+  .pills li {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: #d3e9ff;
+    border: 1px solid rgba(140,200,255,.22);
+    background: rgba(10, 30, 58, .45);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding: 9px 15px; border-radius: 999px;
+    transition: border-color .25s, transform .25s;
+    cursor: default;
+  }
+  .pills li:hover { border-color: rgba(56,189,248,.7); transform: translateY(-2px); }
+
+  footer {
+    position: static; z-index: 3;
+    width: 100%;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px 12px calc(18px + env(safe-area-inset-bottom));
+    font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(190, 220, 250, .5);
+    background: linear-gradient(transparent, rgba(2,6,15,.55));
+  }
+  footer b { color: rgba(205,234,255,.85); font-weight: 600; }
+  footer a.pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: rgba(205,234,255,.85); text-decoration: none;
+    border: 1px solid rgba(140,200,255,.25);
+    background: rgba(10, 30, 58, .45);
+    padding: 7px 14px 7px 12px; border-radius: 999px;
+    letter-spacing: .14em; text-transform: none;
+    transition: border-color .25s, transform .25s;
+  }
+  footer a.pill:hover { border-color: rgba(56,189,248,.7); transform: translateY(-2px); }
+  footer a.pill svg { width: 15px; height: 15px; display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 520px) {
+    .pills li { font-size: 10.5px; padding: 8px 12px; }
+    .badge { letter-spacing: .24em; }
+    .aurora { opacity: .42; }
+  }
+  /* telas baixas (laptops pequenos): compacta tudo para caber sem sobrepor */
+  @media (max-height: 780px) {
+    .stage { padding: 26px 16px 18px; }
+    .logo-wrap img { width: min(400px, 72vw); }
+    .badge { margin-top: 20px; font-size: 11px; }
+    h1.tagline { margin-top: 16px; font-size: clamp(18px, 2.6vw, 24px); }
+    p.sub { margin-top: 10px; font-size: 13.5px; line-height: 1.6; }
+    .bar { margin-top: 18px; }
+    .pills { margin-top: 16px; }
+    .pills li { padding: 7px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora span, #words span, .bar i, .dot { animation: none !important; }
+  }
+</style>
+
+<canvas id="netCanvas" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="grid" aria-hidden="true"></div>
+<div id="words" aria-hidden="true"></div>
+<div class="vignette" aria-hidden="true"></div>
+<div class="noise" aria-hidden="true"></div>
+
+<main class="stage">
+  <div class="logo-wrap">
+    <img src="logo.png" alt="yod intelligence" fetchpriority="high">
+  </div>
+
+  <div class="badge"><span class="dot"></span> Em construção</div>
+
+  <h1 class="tagline">Estamos construindo o <span class="grad">futuro dos dados</span></h1>
+  <p class="sub">IA &middot; ciência de dados &middot; BI &middot; produtos de dados &middot; sustentabilidade &middot; data intelligence &middot; AI solutions &middot; research. Voltamos em breve com algo extraordinário.</p>
+
+  <div class="bar" aria-hidden="true"><i></i></div>
+
+  <ul class="pills">
+    <li>IA</li>
+    <li>Ciência de dados</li>
+    <li>BI</li>
+    <li>Produtos de dados</li>
+    <li>Sustentabilidade</li>
+    <li>Data intelligence</li>
+    <li>AI solutions</li>
+    <li>Research</li>
+  </ul>
+</main>
+
+<footer><b>yod</b> intelligence &nbsp;·&nbsp; <span id="yearEl">2026</span> &nbsp;·&nbsp; <a class="pill" href="https://www.instagram.com/yodintelligence" target="_blank" rel="noopener" aria-label="Instagram da yod intelligence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>@yodintelligence</a> <a class="pill" href="mailto:contato@yodintelligence.com.br" aria-label="Enviar e-mail para a yod intelligence"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="m22 7-10 6L2 7"/></svg>contato@yodintelligence.com.br</a></footer>
+
+<script>
+(function () {
+  "use strict";
+  var yearEl = document.getElementById("yearEl");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  /* ---- floating keywords ---- */
+  var terms = ["IA", "Data Science", "BI", "Data Products", "Sustentabilidade",
+    "Data Intelligence", "AI Solutions", "Research", "Machine Learning",
+    "Analytics", "ESG", "Big Data", "Cloud", "Python"];
+  var wordsBox = document.getElementById("words");
+  var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (wordsBox && !reduceMotion) {
+    var N = window.innerWidth < 600 ? 14 : 26;
+    for (var i = 0; i < N; i++) {
+      var s = document.createElement("span");
+      s.textContent = terms[i % terms.length];
+      s.style.left = (Math.random() * 96).toFixed(1) + "vw";
+      s.style.fontSize = (10 + Math.random() * 6).toFixed(1) + "px";
+      s.style.setProperty("--o", (0.08 + Math.random() * 0.16).toFixed(2));
+      s.style.animationDuration = (20 + Math.random() * 22).toFixed(1) + "s";
+      s.style.animationDelay = (-Math.random() * 30).toFixed(1) + "s";
+      wordsBox.appendChild(s);
+    }
+  }
+
+  /* ---- neural / data network canvas ---- */
+  var canvas = document.getElementById("netCanvas");
+  var ctx = canvas.getContext("2d");
+  var W = 0, H = 0, dpr = 1;
+  var pts = [];
+  var mouse = { x: -9999, y: -9999 };
+  var COUNT_DIV = 16000;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var target = Math.max(45, Math.min(130, Math.floor((W * H) / COUNT_DIV)));
+    pts = [];
+    for (var i = 0; i < target; i++) {
+      var a = Math.random() * Math.PI * 2;
+      var sp = 0.15 + Math.random() * 0.45;
+      pts.push({
+        x: Math.random() * W, y: Math.random() * H,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        r: 1 + Math.random() * 1.8
+      });
+    }
+  }
+
+  window.addEventListener("resize", resize);
+  window.addEventListener("pointermove", function (e) {
+    mouse.x = e.clientX; mouse.y = e.clientY;
+  }, { passive: true });
+  window.addEventListener("pointerleave", function () {
+    mouse.x = -9999; mouse.y = -9999;
+  });
+  resize();
+
+  var LINK = 135;
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+
+    var i, j, p, q, dx, dy, d2, alpha;
+    // links
+    for (i = 0; i < pts.length; i++) {
+      p = pts[i];
+      for (j = i + 1; j < pts.length; j++) {
+        q = pts[j];
+        dx = p.x - q.x; dy = p.y - q.y;
+        if (dx > LINK || dx < -LINK || dy > LINK || dy < -LINK) continue;
+        d2 = dx * dx + dy * dy;
+        if (d2 < LINK * LINK) {
+          alpha = (1 - Math.sqrt(d2) / LINK) * 0.34;
+          ctx.strokeStyle = "rgba(80,180,245," + alpha.toFixed(3) + ")";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(q.x, q.y);
+          ctx.stroke();
+        }
+      }
+      // link to mouse
+      dx = p.x - mouse.x; dy = p.y - mouse.y;
+      d2 = dx * dx + dy * dy;
+      if (d2 < 190 * 190) {
+        alpha = (1 - Math.sqrt(d2) / 190) * 0.5;
+        ctx.strokeStyle = "rgba(125,211,252," + alpha.toFixed(3) + ")";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(mouse.x, mouse.y);
+        ctx.stroke();
+      }
+    }
+    // nodes
+    for (i = 0; i < pts.length; i++) {
+      p = pts[i];
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
+      if (p.y < -20) p.y = H + 20; else if (p.y > H + 20) p.y = -20;
+      ctx.fillStyle = "rgba(150,215,255,0.85)";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+      ctx.fill();
+    }
+    if (!reduceMotion) requestAnimationFrame(frame);
+  }
+  if (reduceMotion) {
+    // draw one static frame for accessibility
+    frame();
+  } else {
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+
+</body>
+</html>
